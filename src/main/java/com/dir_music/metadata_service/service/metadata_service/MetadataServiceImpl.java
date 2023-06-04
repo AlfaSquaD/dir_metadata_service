@@ -55,6 +55,9 @@ public class MetadataServiceImpl implements MetadataService {
                                 .artist(metadataModel.getArtist())
                                 .album(metadataModel.getAlbum())
                                 .genre(metadataModel.getGenre())
+                                .durationMillis(metadataModel.getDurationMillis())
+                                .year(metadataModel.getYear())
+                                .sizeBytes(metadataModel.getSizeBytes())
                                 .build();
                         metadataServiceMetadataOutputHashMap.put(metadataModel.getId(), metadataServiceMetadataOutput);
                     }
