@@ -4,11 +4,14 @@ package com.dir_music.metadata_service.controller.metadata_controller;
 import com.dir_music.metadata_service.service.metadata_service.MetadataService;
 import com.dir_music.metadata_service.service.metadata_service.input.MetadataServiceCreateMusicInput;
 import com.dir_music.metadata_service.service.metadata_service.input.MetadataServiceSearchInput;
+import com.dir_music.metadata_service.service.metadata_service.input.MetadataServiceSongIdInput;
 import com.dir_music.metadata_service.service.metadata_service.output.MetadataServiceMetadataListOutput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController("MetadataController")
 @RequestMapping("/")
@@ -58,6 +61,15 @@ public class MetadataController {
                         .build()
         );
         return ResponseEntity.ok(output);
-
     }
+
+    @PostMapping(path = "/get", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<MetadataServiceMetadataListOutput> getMusic(
+            @RequestBody List<Long> ids
+    ) {
+        final MetadataServiceMetadataListOutput metadataServiceMetadataListOutput
+                = this.metadataService.getListedMusic(new MetadataServiceSongIdInput(ids));
+        return ResponseEntity.ok(metadataServiceMetadataListOutput);
+    }
+
 }
