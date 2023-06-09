@@ -6,6 +6,7 @@ import com.dir_music.metadata_service.repository.metadata_repository.MetadataMod
 import com.dir_music.metadata_service.repository.metadata_repository.MetadataRepository;
 import com.dir_music.metadata_service.service.metadata_service.input.MetadataServiceCreateMusicInput;
 import com.dir_music.metadata_service.service.metadata_service.input.MetadataServiceSearchInput;
+import com.dir_music.metadata_service.service.metadata_service.input.MetadataServiceSongIdInput;
 import com.dir_music.metadata_service.service.metadata_service.output.MetadataServiceMetadataListOutput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -103,6 +104,61 @@ public class MetadataServiceImpl implements MetadataService {
             throw new RuntimeException("Something went wrong");
         }
         return "Success";
+    }
+
+    @Override
+    public MetadataServiceMetadataListOutput getListedMusic(MetadataServiceSongIdInput songIdInput) {
+        final ArrayList<MetadataModel>
+                songs = new ArrayList<>();
+
+        songIdInput.getSongIds().forEach(
+                aLong -> {
+                    songs.add(metadataRepository.findById(aLong).orElseThrow());
+                }
+        );
+
+
+        final ResponseEntity<MusicAvailableResponseModel> musicAvailableResponseModel =
+                songStreamingClient.getAvailableSongsById(songIdInput.getSongIds());
+
+        if (musicAvailableResponseModel.getStatusCode().is2xxSuccessful()) {
+            final HashMap<Long, MetadataServiceMetadataListOutput.MetadataServiceMetadataOutput>
+                    metadataServiceMetadataOutputHashMap = new HashMap<>();
+
+            songs.forEach(
+                    metadataModel -> {
+                        final MetadataServiceMetadataListOutput.MetadataServiceMetadataOutput
+                                metadataServiceMetadataOutput = MetadataServiceMetadataListOutput.MetadataServiceMetadataOutput.builder()
+                                .id(metadataModel.getId())
+                                .title(metadataModel.getTitle())
+                                .artist(metadataModel.getArtist())
+                                .album(metadataModel.getAlbum())
+                                .genre(metadataModel.getGenre())
+                                .durationMillis(metadataModel.getDurationMillis())
+                                .year(metadataModel.getYear())
+                                .sizeBytes(metadataModel.getSizeBytes())
+                                .build();
+                        metadataServiceMetadataOutputHashMap.put(metadataModel.getId(), metadataServiceMetadataOutput);
+                    }
+            );
+
+            Objects.requireNonNull(musicAvailableResponseModel.getBody()).getMusicAvailableModelList().forEach(
+                    musicAvailableModel -> {
+                        metadataServiceMetadataOutputHashMap.get(musicAvailableModel.getId())
+                                .setListenable(musicAvailableModel.getIsAvailable());
+                    }
+            );
+
+            final ArrayList<MetadataServiceMetadataListOutput.MetadataServiceMetadataOutput>
+                    metadataServiceMetadataOutputs = new ArrayList<>(metadataServiceMetadataOutputHashMap.values());
+
+            return MetadataServiceMetadataListOutput.builder()
+                    .results(metadataServiceMetadataOutputs)
+                    .build();
+
+        }
+
+        throw new RuntimeException("Something went wrong");
     }
 
 
