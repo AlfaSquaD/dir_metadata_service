@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController("MetadataController")
-@RequestMapping("/metadata")
+@RequestMapping("/")
 public class MetadataController {
     final private MetadataService metadataService;
 
