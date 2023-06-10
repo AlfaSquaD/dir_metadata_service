@@ -93,6 +93,7 @@ public class MetadataServiceImpl implements MetadataService {
                 .durationMillis(Long.parseLong(createMusicInput.getDuration()))
                 .year(createMusicInput.getYear())
                 .sizeBytes(createMusicInput.getFile().getSize())
+                .id(0L)
                 .build();
 
         metadataModel = metadataRepository.save(metadataModel);
